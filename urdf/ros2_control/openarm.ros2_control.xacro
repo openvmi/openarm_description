@@ -10,7 +10,7 @@
              gazebo_effort:=^|false
              arm_prefix:=''
              bimanual:=false
-             can_fd:=^|true">
+             can_fd:=^|false">
 
     <ros2_control name="openarm_hardware_interface" type="system">
         <hardware>

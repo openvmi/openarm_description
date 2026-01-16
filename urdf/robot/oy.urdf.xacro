@@ -47,7 +47,7 @@
   <xacro:arg name="left_arm_base_xyz" default="0.0 0.031 0.698" />
   <xacro:arg name="left_arm_base_rpy" default="-1.5708 0 0" />
 
-  <xacro:arg name="can_fd" default="true" />
+  <xacro:arg name="can_fd" default="false" />
 
   <xacro:openarm_robot
   arm_type="oy"
