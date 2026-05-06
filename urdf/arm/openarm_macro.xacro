@@ -63,7 +63,7 @@
     </transmission>
   </xacro:macro>
 
-  <xacro:macro name="transmission-openarm-model" params="arm_type:=v10 root:=v10_joint1 tip:=v10_joint7">
+  <xacro:macro name="transmission-openarm-model" params="arm_type:=oy root:=oy_joint1 tip:=oy_joint7">
     <transmission name="${arm_prefix}${arm_type}_openarm_model">
       <type>openarm_hw/openarmModelInterface</type>
       <joint name="${root}">

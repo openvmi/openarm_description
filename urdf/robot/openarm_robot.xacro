@@ -36,6 +36,14 @@
             left_arm_prefix:='left_'
             right_arm_prefix:='right_'
             can_fd:='false'
+            gravity_compensation:='true'
+            gravity_compensation_scale:='1.0'
+            payload_mass:='0.0'
+            payload_com_x:='0.0'
+            payload_com_y:='0.0'
+            payload_com_z:='0.0'
+            position_smoothing_tau:='0.1'
+            max_velocity_acceleration:='5.0'
             "
             >
 
@@ -108,7 +116,16 @@
             fake_sensor_commands="${fake_sensor_commands}"
             left_arm_prefix="${left_arm_prefix}"
             right_arm_prefix="${right_arm_prefix}"
-            hand="${hand}"/>
+            hand="${hand}"
+            can_fd="${can_fd}"
+            gravity_compensation="${gravity_compensation}"
+            gravity_compensation_scale="${gravity_compensation_scale}"
+            payload_mass="${payload_mass}"
+            payload_com_x="${payload_com_x}"
+            payload_com_y="${payload_com_y}"
+            payload_com_z="${payload_com_z}"
+            position_smoothing_tau="${position_smoothing_tau}"
+            max_velocity_acceleration="${max_velocity_acceleration}"/>
         </xacro:if>
 
         <xacro:if value="$(eval hand and ee_type == 'openarm_hand')">
@@ -166,7 +183,15 @@
             fake_sensor_commands="${fake_sensor_commands}"
             hand="${hand}"
             bimanual="false"
-            can_fd="${can_fd}"/>
+            can_fd="${can_fd}"
+            gravity_compensation="${gravity_compensation}"
+            gravity_compensation_scale="${gravity_compensation_scale}"
+            payload_mass="${payload_mass}"
+            payload_com_x="${payload_com_x}"
+            payload_com_y="${payload_com_y}"
+            payload_com_z="${payload_com_z}"
+            position_smoothing_tau="${position_smoothing_tau}"
+            max_velocity_acceleration="${max_velocity_acceleration}"/>
         </xacro:if>
 
         <xacro:if value="${hand and ee_type == 'openarm_hand'}">

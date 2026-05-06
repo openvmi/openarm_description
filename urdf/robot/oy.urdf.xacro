@@ -49,6 +49,22 @@
 
   <xacro:arg name="can_fd" default="false" />
 
+  <xacro:arg name="gravity_compensation" default="true" />
+
+  <xacro:arg name="gravity_compensation_scale" default="1.0" />
+
+  <xacro:arg name="payload_mass" default="0.0" />
+
+  <xacro:arg name="payload_com_x" default="0.0" />
+
+  <xacro:arg name="payload_com_y" default="0.0" />
+
+  <xacro:arg name="payload_com_z" default="0.0" />
+
+  <xacro:arg name="position_smoothing_tau" default="0.1" />
+
+  <xacro:arg name="max_velocity_acceleration" default="5.0" />
+
   <xacro:openarm_robot
   arm_type="oy"
   body_type="oy"
@@ -82,6 +98,14 @@
   right_arm_base_rpy="$(arg right_arm_base_rpy)"
   left_arm_base_rpy="$(arg left_arm_base_rpy)"
   can_fd="$(arg can_fd)"
+  gravity_compensation="$(arg gravity_compensation)"
+  gravity_compensation_scale="$(arg gravity_compensation_scale)"
+  payload_mass="$(arg payload_mass)"
+  payload_com_x="$(arg payload_com_x)"
+  payload_com_y="$(arg payload_com_y)"
+  payload_com_z="$(arg payload_com_z)"
+  position_smoothing_tau="$(arg position_smoothing_tau)"
+  max_velocity_acceleration="$(arg max_velocity_acceleration)"
   />
 
 </robot>

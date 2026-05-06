@@ -10,7 +10,15 @@
              hand:=^|false
              left_arm_prefix:=^|left_
              right_arm_prefix:=^|right_
-             can_fd:=^|false">
+             can_fd:=^|false
+             gravity_compensation:=true
+             gravity_compensation_scale:=1.0
+             payload_mass:=0.0
+             payload_com_x:=0.0
+             payload_com_y:=0.0
+             payload_com_z:=0.0
+             position_smoothing_tau:=0.1
+             max_velocity_acceleration:=5.0">
 
     <!-- Left Arm Hardware Interface -->
     <ros2_control name="openarm_left_hardware_interface" type="system">
@@ -18,7 +26,7 @@
           <param name="arm_type">${arm_type}</param>
           <xacro:if value="${use_fake_hardware}">
             <plugin>mock_components/GenericSystem</plugin>
-            <param name="fake_sensor_commands">${fake_sensor_commands}</param>
+            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
             <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
@@ -27,6 +35,14 @@
             <param name="arm_prefix">${left_arm_prefix}</param>
             <param name="hand">${hand}</param>
             <param name="can_fd">${can_fd}</param>
+            <param name="gravity_compensation">${gravity_compensation}</param>
+            <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
+            <param name="payload_mass">${payload_mass}</param>
+            <param name="payload_com_x">${payload_com_x}</param>
+            <param name="payload_com_y">${payload_com_y}</param>
+            <param name="payload_com_z">${payload_com_z}</param>
+            <param name="position_smoothing_tau">${position_smoothing_tau}</param>
+            <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
           </xacro:unless>
         </hardware>
 
@@ -69,7 +85,7 @@
           <param name="arm_type">${arm_type}</param>
           <xacro:if value="${use_fake_hardware}">
             <plugin>mock_components/GenericSystem</plugin>
-            <param name="fake_sensor_commands">${fake_sensor_commands}</param>
+            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
             <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
@@ -78,6 +94,14 @@
             <param name="arm_prefix">${right_arm_prefix}</param>
             <param name="hand">${hand}</param>
             <param name="can_fd">${can_fd}</param>
+            <param name="gravity_compensation">${gravity_compensation}</param>
+            <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
+            <param name="payload_mass">${payload_mass}</param>
+            <param name="payload_com_x">${payload_com_x}</param>
+            <param name="payload_com_y">${payload_com_y}</param>
+            <param name="payload_com_z">${payload_com_z}</param>
+            <param name="position_smoothing_tau">${position_smoothing_tau}</param>
+            <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
           </xacro:unless>
         </hardware>
 
