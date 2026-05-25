@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Fake / simulation hardware: GenericSystem (mock) or TopicBasedSystem (sim bridge). -->
+  <xacro:macro name="openarm_fake_hardware"
+               params="use_simulation:=false
+                       fake_sensor_commands:=false
+                       joint_commands_topic:=/robot_joint_command
+                       joint_states_topic:=/robot_joint_states
+                       sum_wrapped_joint_states:=true">
+    <xacro:if value="${use_simulation}">
+      <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+      <param name="joint_commands_topic">${joint_commands_topic}</param>
+      <param name="joint_states_topic">${joint_states_topic}</param>
+      <param name="sum_wrapped_joint_states">${sum_wrapped_joint_states}</param>
+    </xacro:if>
+    <xacro:unless value="${use_simulation}">
+      <plugin>mock_components/GenericSystem</plugin>
+      <param name="mock_sensor_commands">${fake_sensor_commands}</param>
+      <param name="state_following_offset">0.0</param>
+    </xacro:unless>
+  </xacro:macro>
+
+</robot>

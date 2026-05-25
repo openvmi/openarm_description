@@ -37,7 +37,23 @@
 
   <xacro:arg name="use_fake_hardware" default="false" />
 
+  <xacro:arg name="use_simulation" default="false" />
+
   <xacro:arg name="fake_sensor_commands" default="false" />
+
+  <xacro:arg name="joint_commands_topic" default="/robot_joint_command" />
+
+  <xacro:arg name="joint_states_topic" default="/robot_joint_states" />
+
+  <xacro:arg name="left_joint_commands_topic" default="/left_robot_joint_command" />
+
+  <xacro:arg name="left_joint_states_topic" default="/left_robot_joint_states" />
+
+  <xacro:arg name="right_joint_commands_topic" default="/right_robot_joint_command" />
+
+  <xacro:arg name="right_joint_states_topic" default="/right_robot_joint_states" />
+
+  <xacro:arg name="sum_wrapped_joint_states" default="true" />
 
   <xacro:arg name="bimanual" default="false" />
 
@@ -70,7 +86,15 @@
   left_arm_prefix="$(arg left_arm_prefix)"
   right_arm_prefix="$(arg right_arm_prefix)"
   use_fake_hardware="$(arg use_fake_hardware)"
+  use_simulation="$(arg use_simulation)"
   fake_sensor_commands="$(arg fake_sensor_commands)"
+  joint_commands_topic="$(arg joint_commands_topic)"
+  joint_states_topic="$(arg joint_states_topic)"
+  left_joint_commands_topic="$(arg left_joint_commands_topic)"
+  left_joint_states_topic="$(arg left_joint_states_topic)"
+  right_joint_commands_topic="$(arg right_joint_commands_topic)"
+  right_joint_states_topic="$(arg right_joint_states_topic)"
+  sum_wrapped_joint_states="$(arg sum_wrapped_joint_states)"
   no_prefix="$(arg no_prefix)"
   arm_prefix=""
   body_prefix=""
