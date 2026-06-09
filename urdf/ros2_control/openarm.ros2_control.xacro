@@ -1,17 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm_hardware_interface.xacro" />
-
 <xacro:macro name="openarm_arm_ros2_control"
          params="arm_type
              can_interface
              use_fake_hardware:=^|false
-             use_simulation:=^|false
              fake_sensor_commands:=^|false
-             joint_commands_topic:=^|/robot_joint_command
-             joint_states_topic:=^|/robot_joint_states
-             sum_wrapped_joint_states:=^|true
              hand:=^|false
              gazebo_effort:=^|false
              arm_prefix:=''
@@ -33,12 +27,9 @@
           <param name="arm_type">${arm_type}</param>
           <param name="prefix">${arm_prefix}</param>
           <xacro:if value="${use_fake_hardware}">
-            <xacro:openarm_fake_hardware
-              use_simulation="${use_simulation}"
-              fake_sensor_commands="${fake_sensor_commands}"
-              joint_commands_topic="${joint_commands_topic}"
-              joint_states_topic="${joint_states_topic}"
-              sum_wrapped_joint_states="${sum_wrapped_joint_states}"/>
+            <plugin>mock_components/GenericSystem</plugin>
+            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
+            <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
             <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>

@@ -1,20 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm_hardware_interface.xacro" />
-
 <xacro:macro name="openarm_bimanual_ros2_control"
          params="arm_type
              left_can_interface:=^|can1
              right_can_interface:=^|can0
              use_fake_hardware:=^|false
-             use_simulation:=^|false
              fake_sensor_commands:=^|false
-             left_joint_commands_topic:=^|/left_robot_joint_command
-             left_joint_states_topic:=^|/left_robot_joint_states
-             right_joint_commands_topic:=^|/right_robot_joint_command
-             right_joint_states_topic:=^|/right_robot_joint_states
-             sum_wrapped_joint_states:=^|true
              hand:=^|false
              left_arm_prefix:=^|left_
              right_arm_prefix:=^|right_
@@ -35,12 +27,9 @@
         <hardware>
           <param name="arm_type">${arm_type}</param>
           <xacro:if value="${use_fake_hardware}">
-            <xacro:openarm_fake_hardware
-              use_simulation="${use_simulation}"
-              fake_sensor_commands="${fake_sensor_commands}"
-              joint_commands_topic="${left_joint_commands_topic}"
-              joint_states_topic="${left_joint_states_topic}"
-              sum_wrapped_joint_states="${sum_wrapped_joint_states}"/>
+            <plugin>mock_components/GenericSystem</plugin>
+            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
+            <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
             <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
@@ -99,12 +88,9 @@
         <hardware>
           <param name="arm_type">${arm_type}</param>
           <xacro:if value="${use_fake_hardware}">
-            <xacro:openarm_fake_hardware
-              use_simulation="${use_simulation}"
-              fake_sensor_commands="${fake_sensor_commands}"
-              joint_commands_topic="${right_joint_commands_topic}"
-              joint_states_topic="${right_joint_states_topic}"
-              sum_wrapped_joint_states="${sum_wrapped_joint_states}"/>
+            <plugin>mock_components/GenericSystem</plugin>
+            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
+            <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
             <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
