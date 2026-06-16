@@ -44,6 +44,21 @@
             payload_com_z:='0.0'
             position_smoothing_tau:='0.1'
             max_velocity_acceleration:='5.0'
+            attach_head_d435:='false'
+            head_d435_name:='head_d435'
+            head_d435_parent:='openarm_body_link0'
+            head_d435_xyz:='0 0 0'
+            head_d435_rpy:='0 0 0'
+            attach_left_d405:='false'
+            left_d405_name:='left_d405'
+            left_d405_parent:='openarm_left_hand'
+            left_d405_xyz:='0 0 0'
+            left_d405_rpy:='0 0 0'
+            attach_right_d405:='false'
+            right_d405_name:='right_d405'
+            right_d405_parent:='openarm_right_hand'
+            right_d405_xyz:='0 0 0'
+            right_d405_rpy:='0 0 0'
             "
             >
 
@@ -55,6 +70,7 @@
     <xacro:include filename="$(find openarm_description)/urdf/ee/openarm_hand_macro.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm.ros2_control.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm.bimanual.ros2_control.xacro" />
+    <xacro:include filename="$(find openarm_description)/urdf/sensors/openarm_cameras.xacro" />
     <xacro:if value="${ee_type != 'none'}">
         <xacro:include filename="$(find openarm_description)/urdf/ee/${ee_type}_arguments.xacro" />
     </xacro:if>
@@ -156,6 +172,25 @@
                 description_pkg="$(arg description_pkg)"
             />
           </xacro:if>
+
+        <!-- Optional RealSense cameras attached to body/wrists.
+             All flags default to false so existing flows are unchanged. -->
+        <xacro:openarm_cameras
+            attach_head_d435="${attach_head_d435}"
+            head_d435_name="${head_d435_name}"
+            head_d435_parent="${head_d435_parent}"
+            head_d435_xyz="${head_d435_xyz}"
+            head_d435_rpy="${head_d435_rpy}"
+            attach_left_d405="${attach_left_d405}"
+            left_d405_name="${left_d405_name}"
+            left_d405_parent="${left_d405_parent}"
+            left_d405_xyz="${left_d405_xyz}"
+            left_d405_rpy="${left_d405_rpy}"
+            attach_right_d405="${attach_right_d405}"
+            right_d405_name="${right_d405_name}"
+            right_d405_parent="${right_d405_parent}"
+            right_d405_xyz="${right_d405_xyz}"
+            right_d405_rpy="${right_d405_rpy}" />
     </xacro:if>
 
     <xacro:if value="${not bimanual}">

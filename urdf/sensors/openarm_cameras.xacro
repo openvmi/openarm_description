@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  Conditional RealSense camera attachments for the OpenArm robot.
+
+  Provides a single macro `openarm_cameras` that optionally attaches:
+    - a head D435 to the body (defaults: openarm_body_link0)
+    - a left-wrist D405  (defaults: openarm_left_hand)
+    - a right-wrist D405 (defaults: openarm_right_hand)
+
+  Each camera is gated by its own `attach_*` flag (default false) and the
+  RealSense `sensor_d435` / `sensor_d405` macros are only included once so
+  the realsense2_description package is not required when no camera is
+  attached. Camera offsets are passed in as macro params and should match
+  the values in openarm_vision_bringup/config/camera_mounts.yaml.
+
+  The live realsense2_camera node still publishes the internal optical
+  frames (`*_color_optical_frame`, `*_depth_optical_frame`, etc.) under the
+  `${name}_link` we declare here, so we keep `use_nominal_extrinsics=false`
+  to avoid duplicate / drifting optical-frame publishers.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+  <xacro:include filename="$(find realsense2_description)/urdf/_d405.urdf.xacro" />
+
+  <xacro:macro name="openarm_cameras"
+    params="attach_head_d435:=false
+            head_d435_name:=head_d435
+            head_d435_parent:=openarm_body_link0
+            head_d435_xyz:='0 0 0'
+            head_d435_rpy:='0 0 0'
+            attach_left_d405:=false
+            left_d405_name:=left_d405
+            left_d405_parent:=openarm_left_hand
+            left_d405_xyz:='0 0 0'
+            left_d405_rpy:='0 0 0'
+            attach_right_d405:=false
+            right_d405_name:=right_d405
+            right_d405_parent:=openarm_right_hand
+            right_d405_xyz:='0 0 0'
+            right_d405_rpy:='0 0 0'">
+
+    <xacro:if value="${attach_head_d435}">
+      <xacro:sensor_d435 name="${head_d435_name}" parent="${head_d435_parent}" use_nominal_extrinsics="false">
+        <origin xyz="${head_d435_xyz}" rpy="${head_d435_rpy}" />
+      </xacro:sensor_d435>
+    </xacro:if>
+
+    <xacro:if value="${attach_left_d405}">
+      <xacro:sensor_d405 name="${left_d405_name}" parent="${left_d405_parent}" use_nominal_extrinsics="false">
+        <origin xyz="${left_d405_xyz}" rpy="${left_d405_rpy}" />
+      </xacro:sensor_d405>
+    </xacro:if>
+
+    <xacro:if value="${attach_right_d405}">
+      <xacro:sensor_d405 name="${right_d405_name}" parent="${right_d405_parent}" use_nominal_extrinsics="false">
+        <origin xyz="${right_d405_xyz}" rpy="${right_d405_rpy}" />
+      </xacro:sensor_d405>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>
