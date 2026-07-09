@@ -19,53 +19,60 @@
              payload_com_z:=0.0
              position_smoothing_tau:=0.1
              max_velocity_acceleration:=5.0
-             damping_kp_scale:=0.05
-             damping_kd_scale:=1.0">
+             ">
 
     <!-- Left Arm Hardware Interface -->
     <ros2_control name="openarm_left_hardware_interface" type="system">
         <hardware>
+          <!-- Unified plugin: fake/real mode controlled by use_fake_hardware param
+               and switchable at runtime via /{node}/set_real_mode service. -->
+          <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
+          <param name="use_fake_hardware">${use_fake_hardware}</param>
           <param name="arm_type">${arm_type}</param>
-          <xacro:if value="${use_fake_hardware}">
-            <plugin>mock_components/GenericSystem</plugin>
-            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
-            <param name="state_following_offset">0.0</param>
-          </xacro:if>
-          <xacro:unless value="${use_fake_hardware}">
-            <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
-            <param name="can_interface">${left_can_interface}</param>
-            <param name="arm_prefix">${left_arm_prefix}</param>
-            <param name="hand">${hand}</param>
-            <param name="can_fd">${can_fd}</param>
-            <param name="gravity_compensation">${gravity_compensation}</param>
-            <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
-            <param name="payload_mass">${payload_mass}</param>
-            <param name="payload_com_x">${payload_com_x}</param>
-            <param name="payload_com_y">${payload_com_y}</param>
-            <param name="payload_com_z">${payload_com_z}</param>
-            <param name="position_smoothing_tau">${position_smoothing_tau}</param>
-            <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
-            <param name="damping_kp_scale">${damping_kp_scale}</param>
-            <param name="damping_kd_scale">${damping_kd_scale}</param>
-          </xacro:unless>
+          <param name="can_interface">${left_can_interface}</param>
+          <param name="arm_prefix">${left_arm_prefix}</param>
+          <param name="hand">${hand}</param>
+          <param name="can_fd">${can_fd}</param>
+          <param name="gravity_compensation">${gravity_compensation}</param>
+          <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
+          <param name="payload_mass">${payload_mass}</param>
+          <param name="payload_com_x">${payload_com_x}</param>
+          <param name="payload_com_y">${payload_com_y}</param>
+          <param name="payload_com_z">${payload_com_z}</param>
+          <param name="position_smoothing_tau">${position_smoothing_tau}</param>
+          <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
         </hardware>
 
-      <xacro:macro name="configure_joint" params="joint_name initial_position">
+      <xacro:macro name="configure_joint" params="joint_name initial_position mit_kp:=0.0 mit_kd:=0.0">
         <joint name="${joint_name}">
+          <!-- Command Interfaces -->
           <command_interface name="position"/>
           <command_interface name="velocity"/>
           <command_interface name="effort"/>
+          <!-- MIT impedance gain command interfaces (written by MITParamController) -->
+          <command_interface name="kp">
+            <param name="initial_value">${mit_kp}</param>
+          </command_interface>
+          <command_interface name="kd">
+            <param name="initial_value">${mit_kd}</param>
+          </command_interface>
 
+          <!-- State Interfaces -->
           <state_interface name="position">
             <param name="initial_value">${initial_position}</param>
           </state_interface>
-
           <state_interface name="velocity">
             <param name="initial_value">0.0</param>
           </state_interface>
-
           <state_interface name="effort">
             <param name="initial_value">0.0</param>
+          </state_interface>
+          <!-- MIT impedance gain state interfaces (reflect active gains) -->
+          <state_interface name="kp">
+            <param name="initial_value">${mit_kp}</param>
+          </state_interface>
+          <state_interface name="kd">
+            <param name="initial_value">${mit_kd}</param>
           </state_interface>
         </joint>
       </xacro:macro>
@@ -86,29 +93,21 @@
     <!-- Right Arm Hardware Interface -->
     <ros2_control name="openarm_right_hardware_interface" type="system">
         <hardware>
+          <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
+          <param name="use_fake_hardware">${use_fake_hardware}</param>
           <param name="arm_type">${arm_type}</param>
-          <xacro:if value="${use_fake_hardware}">
-            <plugin>mock_components/GenericSystem</plugin>
-            <param name="mock_sensor_commands">${fake_sensor_commands}</param>
-            <param name="state_following_offset">0.0</param>
-          </xacro:if>
-          <xacro:unless value="${use_fake_hardware}">
-            <plugin>openarm_hardware/OpenArm_${arm_type}HW</plugin>
-            <param name="can_interface">${right_can_interface}</param>
-            <param name="arm_prefix">${right_arm_prefix}</param>
-            <param name="hand">${hand}</param>
-            <param name="can_fd">${can_fd}</param>
-            <param name="gravity_compensation">${gravity_compensation}</param>
-            <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
-            <param name="payload_mass">${payload_mass}</param>
-            <param name="payload_com_x">${payload_com_x}</param>
-            <param name="payload_com_y">${payload_com_y}</param>
-            <param name="payload_com_z">${payload_com_z}</param>
-            <param name="position_smoothing_tau">${position_smoothing_tau}</param>
-            <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
-            <param name="damping_kp_scale">${damping_kp_scale}</param>
-            <param name="damping_kd_scale">${damping_kd_scale}</param>
-          </xacro:unless>
+          <param name="can_interface">${right_can_interface}</param>
+          <param name="arm_prefix">${right_arm_prefix}</param>
+          <param name="hand">${hand}</param>
+          <param name="can_fd">${can_fd}</param>
+          <param name="gravity_compensation">${gravity_compensation}</param>
+          <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
+          <param name="payload_mass">${payload_mass}</param>
+          <param name="payload_com_x">${payload_com_x}</param>
+          <param name="payload_com_y">${payload_com_y}</param>
+          <param name="payload_com_z">${payload_com_z}</param>
+          <param name="position_smoothing_tau">${position_smoothing_tau}</param>
+          <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
         </hardware>
 
       <xacro:configure_joint joint_name="openarm_${right_arm_prefix}joint1" initial_position="0.0"/>
