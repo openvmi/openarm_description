@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!-- OpenArm 攝像頭 URDF（頂層文件）
+     將 D435（頭部）和 D405（左右腕）攝像頭模型附加到機械臂 link。
+     僅在攝像頭啟動時由 cameras.launch.py 載入並發布到 /cameras/robot_description，
+     RViz 通過獨立 RobotModel 顯示讀取該 topic 顯示攝像頭模型。
+     相機位置參數由 cameras.launch.py 從 camera_params.yaml 讀取後通過 xacro mappings 傳入。
+
+     結構說明：
+     - world 為虛擬根 link（與機械臂 RViz fixed frame 一致）
+     - parent link（openarm_body_link0 等）作為空 link 附加到 world（identity joint），
+       僅為滿足 URDF 單根要求；RViz 使用 TF 定位，不用 URDF joint
+     - camera_link 附加到 parent link，TF 由 static_transform_publisher 提供
+     - robot_state_publisher 的 TF 發布已禁用（publish_frequency=0.0001, use_tf_static=false） -->
+<robot name="openarm_cameras" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find openarm_description)/urdf/cameras/_d435.urdf.xacro" />
+  <xacro:include filename="$(find openarm_description)/urdf/cameras/_d405.urdf.xacro" />
+
+  <!-- 頭部攝像頭 D435 參數 -->
+  <xacro:arg name="head_parent" default="openarm_body_link0" />
+  <xacro:arg name="head_xyz" default="0 0 0.15" />
+  <xacro:arg name="head_rpy" default="0 0 0" />
+  <xacro:arg name="head_enabled" default="true" />
+
+  <!-- 左腕攝像頭 D405 參數 -->
+  <xacro:arg name="left_parent" default="openarm_left_link7" />
+  <xacro:arg name="left_xyz" default="0.04 0 0" />
+  <xacro:arg name="left_rpy" default="0 1.5708 0" />
+  <xacro:arg name="left_enabled" default="true" />
+
+  <!-- 右腕攝像頭 D405 參數 -->
+  <xacro:arg name="right_parent" default="openarm_right_link7" />
+  <xacro:arg name="right_xyz" default="0.04 0 0" />
+  <xacro:arg name="right_rpy" default="0 1.5708 0" />
+  <xacro:arg name="right_enabled" default="true" />
+
+  <!-- 虛擬根 link：與 RViz fixed frame 一致 -->
+  <link name="world" />
+
+  <!-- 空 parent link 定義（附加到 world，identity joint 僅為 URDF 單根結構） -->
+  <xacro:if value="$(arg head_enabled)">
+    <joint name="head_parent_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="world" />
+      <child link="$(arg head_parent)" />
+    </joint>
+    <link name="$(arg head_parent)" />
+  </xacro:if>
+
+  <xacro:if value="$(arg left_enabled)">
+    <joint name="left_parent_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="world" />
+      <child link="$(arg left_parent)" />
+    </joint>
+    <link name="$(arg left_parent)" />
+  </xacro:if>
+
+  <xacro:if value="$(arg right_enabled)">
+    <joint name="right_parent_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="world" />
+      <child link="$(arg right_parent)" />
+    </joint>
+    <link name="$(arg right_parent)" />
+  </xacro:if>
+
+  <!-- 頭部攝像頭 D435 -->
+  <xacro:if value="$(arg head_enabled)">
+    <xacro:sensor_d435 parent="$(arg head_parent)" name="camera_head">
+      <origin xyz="$(arg head_xyz)" rpy="$(arg head_rpy)" />
+    </xacro:sensor_d435>
+  </xacro:if>
+
+  <!-- 左腕攝像頭 D405 -->
+  <xacro:if value="$(arg left_enabled)">
+    <xacro:sensor_d405 parent="$(arg left_parent)" name="camera_left">
+      <origin xyz="$(arg left_xyz)" rpy="$(arg left_rpy)" />
+    </xacro:sensor_d405>
+  </xacro:if>
+
+  <!-- 右腕攝像頭 D405 -->
+  <xacro:if value="$(arg right_enabled)">
+    <xacro:sensor_d405 parent="$(arg right_parent)" name="camera_right">
+      <origin xyz="$(arg right_xyz)" rpy="$(arg right_rpy)" />
+    </xacro:sensor_d405>
+  </xacro:if>
+
+</robot>
