@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- RealSense 攝像頭材料定義（從 realsense2_description 合併到 openarm_description） -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="realsense_materials_defined" default="false" />
+  <xacro:unless value="${realsense_materials_defined}">
+    <xacro:property name="realsense_materials_defined" value="true" />
+    <material name="aluminum">
+      <color rgba="0.5 0.5 0.5 1"/>
+    </material>
+    <material name="plastic">
+      <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+  </xacro:unless>
+</robot>

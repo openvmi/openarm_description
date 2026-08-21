@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- RealSense D405 攝像頭 URDF 宏（從 realsense2_description 合併到 openarm_description）
+     簡化設計：直接將 camera_link 附加到 parent，無中間 bottom_screw_frame，
+     與 cameras.launch.py 中的 static_transform_publisher TF 結構一致。
+     mesh 使用 realsense2_description 的真實 D405 模型。 -->
+<robot name="sensor_d405" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find openarm_description)/urdf/cameras/_materials.urdf.xacro" />
+
+  <xacro:macro name="sensor_d405" params="parent *origin name:=camera">
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+
+    <!-- D405 攝像頭尺寸（來自 realsense2_description） -->
+    <xacro:property name="d405_cam_width" value="0.042" />
+    <xacro:property name="d405_cam_height" value="0.042" />
+    <xacro:property name="d405_cam_depth" value="0.023" />
+    <xacro:property name="d405_cam_mount_from_center_offset" value="0.01465" />
+
+    <!-- camera_link 直接附加到 parent，與 static TF 一致 -->
+    <joint name="${name}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_link" />
+    </joint>
+
+    <link name="${name}_link">
+      <visual>
+        <!-- mesh 定位：相對於 camera_link 的偏移，與 realsense2_description 原始絕對位置一致 -->
+        <origin xyz="${d405_cam_mount_from_center_offset} 0 ${d405_cam_height/2}" rpy="${M_PI/2} 0 ${M_PI/2}" />
+        <geometry>
+          <mesh filename="package://openarm_description/meshes/cameras/d405.stl" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="aluminum" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="${d405_cam_depth} ${d405_cam_width} ${d405_cam_height}" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.072" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.003881243" ixy="0.0" ixz="0.0" iyy="0.000498940" iyz="0.0" izz="0.003879257" />
+      </inertial>
+    </link>
+  </xacro:macro>
+</robot>
