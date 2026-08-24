@@ -65,6 +65,26 @@
 
   <xacro:arg name="max_velocity_acceleration" default="5.0" />
 
+  <!-- 末端硬件类型：gripper / dex_hand / both / none。
+       缺省时按 ee_type 联动推导（openarm_hand→gripper, rohand→dex_hand, both→both）。 -->
+  <xacro:arg name="hand_type" default="" />
+
+  <!-- 灵巧手参数（raw 直通：0=完全张开, 65535=完全闭合） -->
+  <xacro:arg name="dex_hand_speed" default="255" />
+  <xacro:arg name="dex_hand_write_rate" default="30.0" />
+  <xacro:arg name="dex_hand_poll_divider" default="2" />
+
+  <xacro:property name="eff_hand_type" value="$(arg hand_type)"/>
+  <xacro:if value="$(eval hand_type == '' and ee_type == 'openarm_hand')">
+    <xacro:property name="eff_hand_type" value="gripper"/>
+  </xacro:if>
+  <xacro:if value="$(eval hand_type == '' and ee_type == 'rohand')">
+    <xacro:property name="eff_hand_type" value="dex_hand"/>
+  </xacro:if>
+  <xacro:if value="$(eval hand_type == '' and ee_type == 'both')">
+    <xacro:property name="eff_hand_type" value="both"/>
+  </xacro:if>
+
   <xacro:openarm_robot
   arm_type="oy"
   body_type="oy"
@@ -79,6 +99,10 @@
   ee_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/kinematics_link.yaml')}"
   hand="$(arg hand)"
   ee_type="$(arg ee_type)"
+  hand_type="${eff_hand_type}"
+  dex_hand_speed="$(arg dex_hand_speed)"
+  dex_hand_write_rate="$(arg dex_hand_write_rate)"
+  dex_hand_poll_divider="$(arg dex_hand_poll_divider)"
   ros2_control="$(arg ros2_control)"
   can_interface="$(arg can_interface)"
   left_can_interface="$(arg left_can_interface)"

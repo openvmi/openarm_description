@@ -1,0 +1,424 @@
+if_connecting_link:
+  axis:
+  - -0.082428
+  - 0.99278
+  - 0.087177
+  child: if_connecting_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.12029
+    y: -0.028806
+    yaw: 0.0
+    z: 0.0072922
+  parent: base_link
+  type: continuous
+if_distal_link:
+  axis:
+  - -0.082428
+  - 0.99278
+  - 0.087177
+  child: if_distal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.035776
+    y: -0.0028401
+    yaw: 0.0
+    z: -0.0014841
+  parent: if_proximal_link
+  type: continuous
+if_proximal_link:
+  axis:
+  - -0.082428
+  - 0.99278
+  - 0.087177
+  child: if_proximal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.11324
+    y: -0.024137
+    yaw: 0.0
+    z: 0.0032314
+  parent: base_link
+  type: continuous
+if_slider_abpart_link:
+  axis:
+  - -0.082734
+  - 0.99276
+  - 0.087135
+  child: if_slider_abpart_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.029189
+    y: 0.0010654
+    yaw: 0.0
+    z: 0.00030518
+  parent: if_slider_link
+  type: continuous
+if_slider_link:
+  axis:
+  - 0.99655
+  - 0.083049
+  - 0.0
+  child: if_slider_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 0.019
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.074396
+    y: -0.026655
+    yaw: 0.0
+    z: -0.0059032
+  parent: base_link
+  type: prismatic
+lf_connecting_link:
+  axis:
+  - 0.11759
+  - 0.98924
+  - -0.087085
+  child: lf_connecting_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.11647
+    y: 0.033555
+    yaw: 0.0
+    z: 0.0078033
+  parent: base_link
+  type: continuous
+lf_distal_link:
+  axis:
+  - 0.11759
+  - 0.98923
+  - -0.087106
+  child: lf_distal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.031562
+    y: 0.0034532
+    yaw: 0.0
+    z: -0.003392
+  parent: lf_proximal_link
+  type: continuous
+lf_proximal_link:
+  axis:
+  - 0.117591058209323
+  - 0.989234457465869
+  - -0.0871064359930968
+  child: lf_proximal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.10871130258864
+    y: 0.0359583660197833
+    yaw: 0.0
+    z: 0.00309824490260681
+  parent: base_link
+  type: continuous
+lf_slider_abpart_link:
+  axis:
+  - 0.117590610595967
+  - 0.989230669602698
+  - -0.0871500465694956
+  child: lf_slider_abpart_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.0283858043783233
+    y: 0.00688449840682251
+    yaw: 0.0
+    z: -0.000306788289491815
+  parent: lf_slider_link
+  type: continuous
+lf_slider_link:
+  axis:
+  - 0.993009723934899
+  - -0.118032543523823
+  - 8.27044911595336e-05
+  child: lf_slider_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 0.019
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.0708466334619896
+    y: 0.0241824111749996
+    yaw: 0.0
+    z: -0.00489967270216645
+  parent: base_link
+  type: prismatic
+mf_connecting_link:
+  axis:
+  - -0.013244
+  - 0.99991
+  - -2.1054e-05
+  child: mf_connecting_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.12342
+    y: -0.0078912
+    yaw: 0.0
+    z: 0.011366
+  parent: base_link
+  type: continuous
+mf_distal_link:
+  axis:
+  - -0.013244
+  - 0.99991
+  - -2.1055e-05
+  child: mf_distal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.040851
+    y: -0.00054126
+    yaw: 0.0
+    z: -0.0035364
+  parent: mf_proximal_link
+  type: continuous
+mf_proximal_link:
+  axis:
+  - -0.013244
+  - 0.99991
+  - -4.2699e-05
+  child: mf_proximal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.11605
+    y: -0.0040932
+    yaw: 0.0
+    z: 0.0069659
+  parent: base_link
+  type: continuous
+mf_slider_abpart_link:
+  axis:
+  - -0.013228
+  - 0.99991
+  - 7.2594e-05
+  child: mf_slider_abpart_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.029044
+    y: 0.0031153
+    yaw: 0.0
+    z: 0.0
+  parent: mf_slider_link
+  type: continuous
+mf_slider_link:
+  axis:
+  - 0.99991
+  - 0.013228
+  - 0.00010039
+  child: mf_slider_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 0.019
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.076974
+    y: -0.010077
+    yaw: 0.0
+    z: -0.0016353
+  parent: base_link
+  type: prismatic
+rf_connecting_link:
+  axis:
+  - 0.0565797489260885
+  - 0.99839808271532
+  - -2.10198201110756e-05
+  child: rf_connecting_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.1204851022382
+    y: 0.0126604995038233
+    yaw: 0.0
+    z: 0.0106153804877178
+  parent: base_link
+  type: continuous
+rf_distal_link:
+  axis:
+  - 0.05658
+  - 0.9984
+  - -2.102e-05
+  child: rf_distal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.035766
+    y: 0.0020268
+    yaw: 0.0
+    z: -0.0026198
+  parent: rf_proximal_link
+  type: continuous
+rf_proximal_link:
+  axis:
+  - 0.05658
+  - 0.9984
+  - -2.102e-05
+  child: rf_proximal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.11287
+    y: 0.015935
+    yaw: 0.0
+    z: 0.0062161
+  parent: base_link
+  type: continuous
+rf_slider_abpart_link:
+  axis:
+  - 0.056554
+  - 0.9984
+  - 7.942e-05
+  child: rf_slider_abpart_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.028756
+    y: 0.0051336
+    yaw: 0.0
+    z: 0.0
+  parent: rf_slider_link
+  type: continuous
+rf_slider_link:
+  axis:
+  - 0.9984
+  - -0.056554
+  - 9.5082e-05
+  child: rf_slider_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 0.019
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.074498
+    y: 0.0072492
+    yaw: 0.0
+    z: -0.0023801
+  parent: base_link
+  type: prismatic
+th_connecting_link:
+  axis:
+  - -0.21699
+  - 0.032029
+  - 0.97565
+  child: th_connecting_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.026144
+    y: -0.020984
+    yaw: 0.0
+    z: -0.0010258
+  parent: th_slider_link
+  type: continuous
+th_distal_link:
+  axis:
+  - -0.21698
+  - 0.032029
+  - 0.97565
+  child: th_distal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.049076
+    y: -0.023254
+    yaw: 0.0
+    z: 0.004868
+  parent: th_proximal_link
+  type: continuous
+th_proximal_link:
+  axis:
+  - -0.21699
+  - -0.032029
+  - 0.97565
+  child: th_proximal_link
+  limit: null
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.025097
+    y: -0.021667
+    yaw: 0.0
+    z: -0.015581
+  parent: th_root_link
+  type: continuous
+th_root_link:
+  axis:
+  - 0.97616
+  - 0.01293
+  - 0.21667
+  child: th_root_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 1.57
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.024656
+    y: -0.019554
+    yaw: 0.0
+    z: -0.018266
+  parent: base_link
+  type: revolute
+th_slider_link:
+  axis:
+  - -0.76198
+  - -0.63028
+  - -0.14877
+  child: th_slider_link
+  limit:
+    effort: 0.0
+    lower: 0.0
+    upper: 0.01
+    velocity: 0.0
+  origin:
+    pitch: 0.0
+    roll: 0.0
+    x: -0.0053401
+    y: -0.0053494
+    yaw: 0.0
+    z: 0.0068801
+  parent: th_proximal_link
+  type: prismatic

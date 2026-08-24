@@ -8,6 +8,14 @@
              use_fake_hardware:=^|false
              fake_sensor_commands:=^|false
              hand:=^|false
+             hand_type:=''
+             left_dex_hand_can_id:=160
+             left_dex_hand_master_id:=161
+             right_dex_hand_can_id:=176
+             right_dex_hand_master_id:=177
+             dex_hand_speed:=255
+             dex_hand_write_rate:=30.0
+             dex_hand_poll_divider:=2
              left_arm_prefix:=^|left_
              right_arm_prefix:=^|right_
              can_fd:=^|false
@@ -21,6 +29,20 @@
              max_velocity_acceleration:=5.0
              ">
 
+    <!-- 末端类型解析：hand_type 显式给出时优先；否则退回旧参数 hand(bool)。
+         gripper / dex_hand / both / none -->
+    <xacro:property name="eff_hand_type" value="${hand_type}"/>
+    <xacro:if value="${hand_type == ''}">
+      <xacro:if value="${hand}">
+        <xacro:property name="eff_hand_type" value="gripper"/>
+      </xacro:if>
+      <xacro:unless value="${hand}">
+        <xacro:property name="eff_hand_type" value="none"/>
+      </xacro:unless>
+    </xacro:if>
+    <xacro:property name="ee_has_gripper" value="${eff_hand_type == 'gripper' or eff_hand_type == 'both'}"/>
+    <xacro:property name="ee_has_dex_hand" value="${eff_hand_type == 'dex_hand' or eff_hand_type == 'both'}"/>
+
     <!-- Left Arm Hardware Interface -->
     <ros2_control name="openarm_left_hardware_interface" type="system">
         <hardware>
@@ -32,6 +54,7 @@
           <param name="can_interface">${left_can_interface}</param>
           <param name="arm_prefix">${left_arm_prefix}</param>
           <param name="hand">${hand}</param>
+          <param name="hand_type">${eff_hand_type}</param>
           <param name="can_fd">${can_fd}</param>
           <param name="gravity_compensation">${gravity_compensation}</param>
           <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
@@ -41,6 +64,14 @@
           <param name="payload_com_z">${payload_com_z}</param>
           <param name="position_smoothing_tau">${position_smoothing_tau}</param>
           <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
+          <xacro:if value="${ee_has_dex_hand}">
+            <!-- 灵巧手（raw 直通：0=完全张开, 65535=完全闭合） -->
+            <param name="dex_hand_can_id">${left_dex_hand_can_id}</param>
+            <param name="dex_hand_master_id">${left_dex_hand_master_id}</param>
+            <param name="dex_hand_speed">${dex_hand_speed}</param>
+            <param name="dex_hand_write_rate">${dex_hand_write_rate}</param>
+            <param name="dex_hand_poll_divider">${dex_hand_poll_divider}</param>
+          </xacro:if>
         </hardware>
 
       <xacro:macro name="configure_joint" params="joint_name initial_position mit_kp:=0.0 mit_kd:=0.0">
@@ -77,6 +108,16 @@
         </joint>
       </xacro:macro>
 
+      <!-- 灵巧手 joint：raw 直通（0=完全张开, 65535=完全闭合），仅位置命令/状态 -->
+      <xacro:macro name="configure_hand_joint" params="joint_name">
+        <joint name="${joint_name}">
+          <command_interface name="position"/>
+          <state_interface name="position">
+            <param name="initial_value">0.0</param>
+          </state_interface>
+        </joint>
+      </xacro:macro>
+
       <xacro:configure_joint joint_name="openarm_${left_arm_prefix}joint1" initial_position="0.0"/>
       <xacro:configure_joint joint_name="openarm_${left_arm_prefix}joint2" initial_position="0.0"/>
       <xacro:configure_joint joint_name="openarm_${left_arm_prefix}joint3" initial_position="0.0"/>
@@ -85,8 +126,17 @@
       <xacro:configure_joint joint_name="openarm_${left_arm_prefix}joint6" initial_position="0.0"/>
       <xacro:configure_joint joint_name="openarm_${left_arm_prefix}joint7" initial_position="0.0"/>
 
-      <xacro:if value="${hand}">
+      <xacro:if value="${ee_has_gripper}">
         <xacro:configure_joint joint_name="openarm_${left_arm_prefix}finger_joint1" initial_position="0.0" />
+      </xacro:if>
+
+      <xacro:if value="${ee_has_dex_hand}">
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint1"/>
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint2"/>
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint3"/>
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint4"/>
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint5"/>
+        <xacro:configure_hand_joint joint_name="openarm_${left_arm_prefix}hand_joint6"/>
       </xacro:if>
     </ros2_control>
 
@@ -99,6 +149,7 @@
           <param name="can_interface">${right_can_interface}</param>
           <param name="arm_prefix">${right_arm_prefix}</param>
           <param name="hand">${hand}</param>
+          <param name="hand_type">${eff_hand_type}</param>
           <param name="can_fd">${can_fd}</param>
           <param name="gravity_compensation">${gravity_compensation}</param>
           <param name="gravity_compensation_scale">${gravity_compensation_scale}</param>
@@ -108,6 +159,14 @@
           <param name="payload_com_z">${payload_com_z}</param>
           <param name="position_smoothing_tau">${position_smoothing_tau}</param>
           <param name="max_velocity_acceleration">${max_velocity_acceleration}</param>
+          <xacro:if value="${ee_has_dex_hand}">
+            <!-- 灵巧手（raw 直通：0=完全张开, 65535=完全闭合） -->
+            <param name="dex_hand_can_id">${right_dex_hand_can_id}</param>
+            <param name="dex_hand_master_id">${right_dex_hand_master_id}</param>
+            <param name="dex_hand_speed">${dex_hand_speed}</param>
+            <param name="dex_hand_write_rate">${dex_hand_write_rate}</param>
+            <param name="dex_hand_poll_divider">${dex_hand_poll_divider}</param>
+          </xacro:if>
         </hardware>
 
       <xacro:configure_joint joint_name="openarm_${right_arm_prefix}joint1" initial_position="0.0"/>
@@ -118,8 +177,17 @@
       <xacro:configure_joint joint_name="openarm_${right_arm_prefix}joint6" initial_position="0.0"/>
       <xacro:configure_joint joint_name="openarm_${right_arm_prefix}joint7" initial_position="0.0"/>
 
-      <xacro:if value="${hand}">
+      <xacro:if value="${ee_has_gripper}">
         <xacro:configure_joint joint_name="openarm_${right_arm_prefix}finger_joint1" initial_position="0.0" />
+      </xacro:if>
+
+      <xacro:if value="${ee_has_dex_hand}">
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint1"/>
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint2"/>
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint3"/>
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint4"/>
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint5"/>
+        <xacro:configure_hand_joint joint_name="openarm_${right_arm_prefix}hand_joint6"/>
       </xacro:if>
     </ros2_control>
 
