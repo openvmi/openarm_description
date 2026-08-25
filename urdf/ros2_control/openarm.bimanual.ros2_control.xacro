@@ -9,10 +9,10 @@
              fake_sensor_commands:=^|false
              hand:=^|false
              hand_type:=''
-             left_dex_hand_can_id:=160
-             left_dex_hand_master_id:=161
-             right_dex_hand_can_id:=176
-             right_dex_hand_master_id:=177
+             left_dex_hand_can_id:=10
+             left_dex_hand_master_id:=11
+             right_dex_hand_can_id:=10
+             right_dex_hand_master_id:=11
              dex_hand_speed:=255
              dex_hand_write_rate:=30.0
              dex_hand_poll_divider:=2
