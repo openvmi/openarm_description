@@ -115,7 +115,8 @@
       <xacro:rohand-inertial name="base_link" ee_inertials="${ee_inertials}"/>
     </link>
 
-    <!-- 基座挂接到 link7（灵巧手安装在 link7 顶部工具法兰面 z=+0.0955，
+    <!-- 基座挂接到 link7（灵巧手取代第 8 轴电机、贴合连接杆的电机安装面
+         z=+0.0495，电机壳体圆柱+输出法兰经 link7_no8 mesh 移除，
          见 rohand_arguments.xacro 注释；朝向默认零位掌心朝立柱侧，见宏注释） -->
     <xacro:unless value="${connected_to == ''}">
       <joint name="${p}rohand_joint" type="fixed">

@@ -98,7 +98,8 @@
         inertials="${inertials}"
         kinematics="${kinematics}"
         kinematics_link="${kinematics_link}"
-        kinematics_offset="${kinematics_offset}" />
+        kinematics_offset="${kinematics_offset}"
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}" />
 
         <!-- right arm -->
         <xacro:openarm_arm
@@ -113,7 +114,8 @@
         inertials="${inertials}"
         kinematics="${kinematics}"
         kinematics_link="${kinematics_link}"
-        kinematics_offset="${kinematics_offset}" />
+        kinematics_offset="${kinematics_offset}"
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}" />
 
         <!-- ros2_control hardware interfaces for bimanual setup -->
         <xacro:if value="${ros2_control}">
@@ -207,6 +209,7 @@
         kinematics_link="${kinematics_link}"
         inertials="${inertials}"
         connected_to=""
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}"
         />
 
         <xacro:if value="${ros2_control}">
