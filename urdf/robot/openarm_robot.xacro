@@ -17,6 +17,10 @@
             rpy:='0 0 0'
             hand:='false'
             ee_type:=''
+            hand_type:=''
+            dex_hand_speed:=255
+            dex_hand_write_rate:=30.0
+            dex_hand_poll_divider:=2
             ros2_control:=false
             can_interface:=''
             use_fake_hardware:=false
@@ -53,10 +57,15 @@
     <xacro:include filename="$(find openarm_description)/urdf/body/openarm_body.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ee/openarm_hand.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ee/openarm_hand_macro.xacro" />
+    <xacro:include filename="$(find openarm_description)/urdf/ee/rohand_macro.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm.ros2_control.xacro" />
     <xacro:include filename="$(find openarm_description)/urdf/ros2_control/openarm.bimanual.ros2_control.xacro" />
-    <xacro:if value="${ee_type != 'none'}">
+    <xacro:if value="${ee_type == 'openarm_hand' or ee_type == 'rohand'}">
         <xacro:include filename="$(find openarm_description)/urdf/ee/${ee_type}_arguments.xacro" />
+    </xacro:if>
+    <xacro:if value="${ee_type == 'both'}">
+        <xacro:include filename="$(find openarm_description)/urdf/ee/openarm_hand_arguments.xacro" />
+        <xacro:include filename="$(find openarm_description)/urdf/ee/rohand_arguments.xacro" />
     </xacro:if>
 
     <xacro:property name="arm_prefix_modified" value="${'' if arm_prefix == '' else arm_prefix + '_'}" />
@@ -89,7 +98,8 @@
         inertials="${inertials}"
         kinematics="${kinematics}"
         kinematics_link="${kinematics_link}"
-        kinematics_offset="${kinematics_offset}" />
+        kinematics_offset="${kinematics_offset}"
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}" />
 
         <!-- right arm -->
         <xacro:openarm_arm
@@ -104,7 +114,8 @@
         inertials="${inertials}"
         kinematics="${kinematics}"
         kinematics_link="${kinematics_link}"
-        kinematics_offset="${kinematics_offset}" />
+        kinematics_offset="${kinematics_offset}"
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}" />
 
         <!-- ros2_control hardware interfaces for bimanual setup -->
         <xacro:if value="${ros2_control}">
@@ -117,6 +128,10 @@
             left_arm_prefix="${left_arm_prefix}"
             right_arm_prefix="${right_arm_prefix}"
             hand="${hand}"
+            hand_type="${hand_type}"
+            dex_hand_speed="${dex_hand_speed}"
+            dex_hand_write_rate="${dex_hand_write_rate}"
+            dex_hand_poll_divider="${dex_hand_poll_divider}"
             can_fd="${can_fd}"
             gravity_compensation="${gravity_compensation}"
             gravity_compensation_scale="${gravity_compensation_scale}"
@@ -128,12 +143,13 @@
             max_velocity_acceleration="${max_velocity_acceleration}"/>
         </xacro:if>
 
-        <xacro:if value="$(eval hand and ee_type == 'openarm_hand')">
+        <!-- 末端显示分发（bimanual）：ee_type ∈ {openarm_hand, both} 显示夹爪 -->
+        <xacro:if value="${hand and (ee_type == 'openarm_hand' or ee_type == 'both')}">
             <xacro:openarm_hand
                 connected_to="openarm_left_link7"
                 arm_type="${arm_type}"
                 arm_prefix="left_"
-                ee_type="${ee_type}"
+                ee_type="openarm_hand"
                 ee_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/kinematics_link.yaml')}"
                 ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/inertials.yaml')}"
                 rpy_ee="$(arg rpy_ee)"
@@ -146,7 +162,7 @@
                 connected_to="openarm_right_link7"
                 arm_type="${arm_type}"
                 arm_prefix="right_"
-                ee_type="${ee_type}"
+                ee_type="openarm_hand"
                 ee_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/kinematics_link.yaml')}"
                 ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/inertials.yaml')}"
                 rpy_ee="$(arg rpy_ee)"
@@ -155,7 +171,29 @@
                 tcp_rpy="$(arg tcp_rpy)"
                 description_pkg="$(arg description_pkg)"
             />
-          </xacro:if>
+        </xacro:if>
+
+        <!-- 末端显示分发（bimanual）：ee_type ∈ {rohand, both} 显示灵巧手 -->
+        <xacro:if value="${ee_type == 'rohand' or ee_type == 'both'}">
+            <xacro:rohand
+                connected_to="openarm_left_link7"
+                arm_prefix="left_"
+                side="left"
+                ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/left/inertials.yaml')}"
+                ee_joints="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/left/joints.yaml')}"
+                rpy_ee="$(arg rohand_rpy_ee)"
+                xyz_ee="$(arg rohand_xyz_ee)"
+            />
+            <xacro:rohand
+                connected_to="openarm_right_link7"
+                arm_prefix="right_"
+                side="right"
+                ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/right/inertials.yaml')}"
+                ee_joints="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/right/joints.yaml')}"
+                rpy_ee="$(arg rohand_rpy_ee)"
+                xyz_ee="$(arg rohand_xyz_ee)"
+            />
+        </xacro:if>
     </xacro:if>
 
     <xacro:if value="${not bimanual}">
@@ -171,6 +209,7 @@
         kinematics_link="${kinematics_link}"
         inertials="${inertials}"
         connected_to=""
+        link7_mesh_suffix="${'_no8' if ee_type == 'rohand' else ''}"
         />
 
         <xacro:if value="${ros2_control}">
@@ -182,6 +221,10 @@
             use_fake_hardware="${use_fake_hardware}"
             fake_sensor_commands="${fake_sensor_commands}"
             hand="${hand}"
+            hand_type="${hand_type}"
+            dex_hand_speed="${dex_hand_speed}"
+            dex_hand_write_rate="${dex_hand_write_rate}"
+            dex_hand_poll_divider="${dex_hand_poll_divider}"
             bimanual="false"
             can_fd="${can_fd}"
             gravity_compensation="${gravity_compensation}"
@@ -194,18 +237,17 @@
             max_velocity_acceleration="${max_velocity_acceleration}"/>
         </xacro:if>
 
-        <xacro:if value="${hand and ee_type == 'openarm_hand'}">
-
+        <!-- 末端显示分发（单臂）：ee_type ∈ {openarm_hand, both} 显示夹爪 -->
+        <xacro:if value="${hand and (ee_type == 'openarm_hand' or ee_type == 'both')}">
         <xacro:property name="special_connection" value="$(arg special_connection)" />
         <!-- <xacro:property name="connection" value="${special_connection if special_connection != '' else arm_type + '_link7'}" /> -->
         <xacro:property name="connection" value="${special_connection if special_connection != '' else 'openarm' + '_link7'}" />
 
-        <xacro:if value="$(eval hand and ee_type == 'openarm_hand')">
         <xacro:openarm_hand
             connected_to="${arm_prefix_modified}${connection}"
             arm_type="${arm_type}"
             arm_prefix="${arm_prefix_modified}"
-            ee_type="${ee_type}"
+            ee_type="openarm_hand"
             ee_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/kinematics_link.yaml')}"
             ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/inertials.yaml')}"
             rpy_ee="$(arg rpy_ee)"
@@ -214,6 +256,18 @@
             tcp_rpy="$(arg tcp_rpy)"
             description_pkg="$(arg description_pkg)"/>
         </xacro:if>
+
+        <!-- 末端显示分发（单臂）：ee_type ∈ {rohand, both} 显示灵巧手 -->
+        <xacro:if value="${ee_type == 'rohand' or ee_type == 'both'}">
+            <xacro:rohand
+                connected_to="${arm_prefix_modified}openarm_link7"
+                arm_prefix="${arm_prefix_modified}"
+                side="$(arg rohand_side)"
+                ee_inertials="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/$(arg rohand_side)/inertials.yaml')}"
+                ee_joints="${xacro.load_yaml('$(find openarm_description)/config/hand/rohand/$(arg rohand_side)/joints.yaml')}"
+                rpy_ee="$(arg rohand_rpy_ee)"
+                xyz_ee="$(arg rohand_xyz_ee)"
+            />
         </xacro:if>
 
         </xacro:if>

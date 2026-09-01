@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    ROHand 五指灵巧手（数据驱动宏）
+    - 几何/惯量/关节参数来源：config/hand/rohand/{left,right}/{inertials,joints}.yaml
+      （由 rohand_urdf_ros2 的 rohand_left/right.urdf 提取，参考包不并入工程）
+    - 载体/显示关节分离：
+        * 6 个 raw 载体关节 {p}hand_joint1..6 —— fixed，挂无几何 dummy link，
+          仅作 ros2_control/controller 命令承载（值域 raw 0~65535，
+          0=完全张开，65535=完全闭合）。RSP 忽略 fixed 关节的 joint_states 值。
+        * 6 个物理量显示关节（th_root revolute 0~1.57rad / 5 个 slider prismatic，
+          th 行程 0.01m、其余 0.019m）+ 19 个派生 continuous 关节 —— 由
+          openarm_rohand 的 kinematics node 独家发布（raw→物理量换算 + FingerMath 派生角）。
+    - 映射：hand_joint1↔th_root, 2↔th_slider, 3↔if_slider, 4↔mf_slider,
+             5↔rf_slider, 6↔lf_slider
+  -->
+
+  <!-- 惯量注入（数据缺失时告警并跳过） -->
+  <xacro:macro name="rohand-inertial" params="name ee_inertials:=^">
+    <xacro:if value="${name in ee_inertials}">
+      <xacro:property name="li" value="${ee_inertials[name]}" lazy_eval="false"/>
+      <inertial>
+        <origin xyz="${li.origin.x} ${li.origin.y} ${li.origin.z}" rpy="0 0 0"/>
+        <mass value="${li.mass}"/>
+        <inertia ixx="${li.inertia.xx}" ixy="${li.inertia.xy}" ixz="${li.inertia.xz}"
+                 iyy="${li.inertia.yy}" iyz="${li.inertia.yz}" izz="${li.inertia.zz}"/>
+      </inertial>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- 显示 link：mesh + 碰撞 + 惯量（名字 = 前缀 + 原名） -->
+  <xacro:macro name="rohand-link" params="name p mesh_dir ee_inertials:=^">
+    <link name="${p}${name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/${name}.STL"/>
+        </geometry>
+        <material name="">
+          <color rgba="1 1 1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/${name}.STL"/>
+        </geometry>
+      </collision>
+      <xacro:rohand-inertial name="${name}" ee_inertials="${ee_inertials}"/>
+    </link>
+  </xacro:macro>
+
+  <!-- 显示 joint：origin/axis/limit 全部来自 joints.yaml（base_link 映射为 rohand_base） -->
+  <xacro:macro name="rohand-joint" params="name p ee_joints:=^">
+    <xacro:property name="J" value="${ee_joints[name]}" lazy_eval="false"/>
+    <xacro:property name="parent_link"
+                    value="${p + 'rohand_base' if J.parent == 'base_link' else p + J.parent}"/>
+    <joint name="${p}${name}" type="${J.type}">
+      <origin xyz="${J.origin.x} ${J.origin.y} ${J.origin.z}"
+              rpy="${J.origin.roll} ${J.origin.pitch} ${J.origin.yaw}"/>
+      <parent link="${parent_link}"/>
+      <child link="${p}${name}"/>
+      <axis xyz="${J.axis[0]} ${J.axis[1]} ${J.axis[2]}"/>
+      <xacro:if value="${J.limit is not None}">
+        <limit lower="${J.limit.lower}" upper="${J.limit.upper}"
+               effort="${J.limit.effort}" velocity="${J.limit.velocity}"/>
+      </xacro:if>
+    </joint>
+  </xacro:macro>
+
+  <!-- raw 载体关节：fixed + 无几何 dummy link，仅承载 ros2_control 命令 -->
+  <xacro:macro name="rohand-carrier-joint" params="n p connected_to">
+    <joint name="${p}hand_joint${n}" type="fixed">
+      <parent link="${connected_to}"/>
+      <child link="${p}hand_joint${n}_carrier"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <link name="${p}hand_joint${n}_carrier"/>
+  </xacro:macro>
+
+  <!-- 主宏：side ∈ {left, right} 决定 mesh 与关节数据集。
+       rpy_ee 为空（默认）时按 side 取默认安装朝向：机械臂零位（臂下垂、法兰工具
+       轴朝下，法兰系 = 世界系绕 x 转 180°，立柱位于两臂之间 y≈0）时掌心朝立柱侧、
+       手指沿工具方向朝下、拇指朝前偏立柱侧（人手臂自然下垂姿态）：
+         left : rpy="0 1.5708 -1.5708" （掌心 → 世界 -y，即左臂的立柱侧）
+         right: rpy="0 1.5708 1.5708"  （掌心 → 世界 +y，即右臂的立柱侧）
+       注：rohand 自身坐标系手指沿 -x 伸展、掌心朝 -z（拇指在食指侧偏掌侧）。 -->
+  <xacro:macro name="rohand"
+               params="connected_to arm_prefix side
+                       ee_inertials ee_joints
+                       xyz_ee:='0 0 0' rpy_ee:=''">
+    <xacro:property name="p" value="openarm_${arm_prefix}"/>
+    <xacro:property name="mesh_dir" value="package://openarm_description/meshes/ee/rohand/${side}"/>
+    <xacro:property name="eff_rpy"
+                    value="${rpy_ee if rpy_ee != '' else ('0 1.5708 -1.5708' if side == 'left' else '0 1.5708 1.5708')}"/>
+
+    <!-- 基座（手掌） -->
+    <link name="${p}rohand_base">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/base_link.STL"/>
+        </geometry>
+        <material name="">
+          <color rgba="1 1 1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/base_link.STL"/>
+        </geometry>
+      </collision>
+      <xacro:rohand-inertial name="base_link" ee_inertials="${ee_inertials}"/>
+    </link>
+
+    <!-- 基座挂接到 link7（灵巧手取代第 8 轴电机、贴合连接杆的电机安装面
+         z=+0.0495，电机壳体圆柱+输出法兰经 link7_no8 mesh 移除，
+         见 rohand_arguments.xacro 注释；朝向默认零位掌心朝立柱侧，见宏注释） -->
+    <xacro:unless value="${connected_to == ''}">
+      <joint name="${p}rohand_joint" type="fixed">
+        <parent link="${connected_to}"/>
+        <child link="${p}rohand_base"/>
+        <origin xyz="${xyz_ee}" rpy="${eff_rpy}"/>
+      </joint>
+    </xacro:unless>
+
+    <!-- 拇指（th_root revolute + th_slider prismatic 0~0.01 + 3 派生 continuous） -->
+    <xacro:rohand-link name="th_root_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="th_root_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="th_proximal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="th_proximal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="th_slider_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="th_slider_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="th_connecting_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="th_connecting_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="th_distal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="th_distal_link" p="${p}" ee_joints="${ee_joints}"/>
+
+    <!-- 食指 -->
+    <xacro:rohand-link name="if_slider_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="if_slider_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="if_slider_abpart_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="if_slider_abpart_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="if_proximal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="if_proximal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="if_distal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="if_distal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="if_connecting_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="if_connecting_link" p="${p}" ee_joints="${ee_joints}"/>
+
+    <!-- 中指 -->
+    <xacro:rohand-link name="mf_slider_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="mf_slider_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="mf_slider_abpart_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="mf_slider_abpart_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="mf_proximal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="mf_proximal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="mf_distal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="mf_distal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="mf_connecting_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="mf_connecting_link" p="${p}" ee_joints="${ee_joints}"/>
+
+    <!-- 无名指 -->
+    <xacro:rohand-link name="rf_slider_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="rf_slider_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="rf_slider_abpart_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="rf_slider_abpart_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="rf_proximal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="rf_proximal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="rf_distal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="rf_distal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="rf_connecting_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="rf_connecting_link" p="${p}" ee_joints="${ee_joints}"/>
+
+    <!-- 小指 -->
+    <xacro:rohand-link name="lf_slider_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="lf_slider_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="lf_slider_abpart_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="lf_slider_abpart_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="lf_proximal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="lf_proximal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="lf_distal_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="lf_distal_link" p="${p}" ee_joints="${ee_joints}"/>
+    <xacro:rohand-link name="lf_connecting_link" p="${p}" mesh_dir="${mesh_dir}" ee_inertials="${ee_inertials}"/>
+    <xacro:rohand-joint name="lf_connecting_link" p="${p}" ee_joints="${ee_joints}"/>
+
+    <!-- 6 个 raw 载体关节（fixed，ros2_control 命令承载） -->
+    <xacro:rohand-carrier-joint n="1" p="${p}" connected_to="${connected_to}"/>
+    <xacro:rohand-carrier-joint n="2" p="${p}" connected_to="${connected_to}"/>
+    <xacro:rohand-carrier-joint n="3" p="${p}" connected_to="${connected_to}"/>
+    <xacro:rohand-carrier-joint n="4" p="${p}" connected_to="${connected_to}"/>
+    <xacro:rohand-carrier-joint n="5" p="${p}" connected_to="${connected_to}"/>
+    <xacro:rohand-carrier-joint n="6" p="${p}" connected_to="${connected_to}"/>
+
+  </xacro:macro>
+
+</robot>
