@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ROHand 灵巧手默认参数（与 openarm_hand_arguments.xacro 同风格，
-       名称加 rohand_ 前缀以便 both 模式下与夹爪参数共存） -->
+       参数使用 rohand_ 前缀区分末端安装配置） -->
 
   <!-- 灵巧手基座相对 link7 的平移偏置。
        link7 mesh 实为两部分（link7.dae 子几何体分析）：

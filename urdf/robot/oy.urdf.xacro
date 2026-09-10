@@ -13,10 +13,6 @@
 
   <xacro:arg name="hand" default="true" />
 
-  <xacro:if value="$(eval ee_type == 'none')">
-    <xacro:property name="hand" value="false"/>
-  </xacro:if>
-
   <xacro:arg name="parent" default="world" />
 
   <xacro:arg name="xyz" default="0 0 0" />
@@ -65,8 +61,8 @@
 
   <xacro:arg name="max_velocity_acceleration" default="5.0" />
 
-  <!-- 末端硬件类型：gripper / dex_hand / both / none。
-       缺省时按 ee_type 联动推导（openarm_hand→gripper, rohand→dex_hand, both→both）。 -->
+  <!-- 末端硬件类型：gripper / dex_hand / none。
+       缺省时按 ee_type 联动推导（openarm_hand→gripper, rohand→dex_hand, none→none）。 -->
   <xacro:arg name="hand_type" default="" />
 
   <!-- 灵巧手参数（raw 直通：0=完全张开, 65535=完全闭合） -->
@@ -81,8 +77,8 @@
   <xacro:if value="$(eval hand_type == '' and ee_type == 'rohand')">
     <xacro:property name="eff_hand_type" value="dex_hand"/>
   </xacro:if>
-  <xacro:if value="$(eval hand_type == '' and ee_type == 'both')">
-    <xacro:property name="eff_hand_type" value="both"/>
+  <xacro:if value="$(eval hand_type == '' and ee_type == 'none')">
+    <xacro:property name="eff_hand_type" value="none"/>
   </xacro:if>
 
   <xacro:openarm_robot
@@ -97,7 +93,7 @@
   body_kinematics="${xacro.load_yaml('$(find openarm_description)/config/body/oy/kinematics.yaml')}"
   body_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/body/oy/kinematics.yaml')}"
   ee_kinematics_link="${xacro.load_yaml('$(find openarm_description)/config/hand/openarm_hand/kinematics_link.yaml')}"
-  hand="$(arg hand)"
+  hand="${False if '$(arg ee_type)' == 'none' else '$(arg hand)'}"
   ee_type="$(arg ee_type)"
   hand_type="${eff_hand_type}"
   dex_hand_speed="$(arg dex_hand_speed)"
