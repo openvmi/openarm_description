@@ -13,7 +13,6 @@
     <xacro:property name="d435_cam_width" value="0.090" />
     <xacro:property name="d435_cam_height" value="0.025" />
     <xacro:property name="d435_cam_depth" value="0.02505" />
-    <xacro:property name="d435_cam_mount_from_center_offset" value="0.0149" />
 
     <!-- camera_link 直接附加到 parent，與 static TF 一致 -->
     <joint name="${name}_joint" type="fixed">
@@ -24,15 +23,16 @@
 
     <link name="${name}_link">
       <visual>
-        <!-- mesh 定位：相對於 camera_link 的偏移，與 realsense2_description 原始絕對位置一致 -->
-        <origin xyz="${d435_cam_mount_from_center_offset} 0 ${d435_cam_height/2}" rpy="${M_PI/2} 0 ${M_PI/2}" />
+        <!-- camera_link 為驅動的深度相機原點，不是外殼中心。
+             按 RealSense D435 模型：前面板偏移 4.2mm + 0.1mm，外殼橫向偏移 -17.5mm。 -->
+        <origin xyz="0.0043 -0.0175 0" rpy="${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
           <mesh filename="package://openarm_description/meshes/cameras/d435.stl" />
         </geometry>
         <material name="aluminum" />
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 -0.0175 0" rpy="0 0 0" />
         <geometry>
           <box size="${d435_cam_depth} ${d435_cam_width} ${d435_cam_height}" />
         </geometry>
